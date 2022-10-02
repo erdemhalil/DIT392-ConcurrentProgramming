@@ -46,7 +46,7 @@ handle(St, {join, Channel}) ->
 handle(St, {leave, Channel}) ->
     case request(list_to_atom(Channel), {leave, Channel, St#client_st.nick, self()}) of
         ok -> {reply, ok, St};
-        {error, user_not_joined, Msg} -> {reply,{error, user_not_joined, Msg}, St};
+        {error, user_not_joined, Msg} -> {reply, {error, user_not_joined, Msg}, St};
         _ -> {reply, ok, St} % not sure if we need that, test without!
     end;
 
