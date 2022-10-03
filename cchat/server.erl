@@ -54,8 +54,10 @@ handle(St, {join, Channel, Nickname, Pid}) ->
 
 channelHandle(St, {join, Pid}) ->
     case lists:member(Pid, St#channel_st.userList) of
+        % If user is already in channel, send appropriate error message
         true ->
             {reply, {error, user_already_joined, "User is already in the channel"}, St};
+        % If user is not in channel, add his Pid to the list of users 
         false ->
             NewUserList = lists:append([Pid], St#channel_st.userList)
             {reply, ok, St#channel_st{userList = NewUserList}}
@@ -63,9 +65,11 @@ channelHandle(St, {join, Pid}) ->
 
 channelHandle(St, {leave, Channel, Nickname, Pid}) ->
     case lists:member(Pid, St#channel_st.userList) of
+        % If user is in channel, update the user list by removing his Pid 
         true -> 
             NewUserList = lists:delete(Pid, St#channel_st.userList),
             {reply, ok, St#channel_st{userList = NewUserList}};
+        % If user is not in channel, send appropriate error message
         false -> 
             {reply, {error, user_not_joined, "User is not in channel"}, St}
     end.
