@@ -61,7 +61,7 @@ channelHandle(St, {join, Pid}) ->
         false ->
             NewUserList = lists:append([Pid], St#channel_st.userList),
             {reply, ok, St#channel_st{userList = NewUserList}}
-        end;
+    end;
 
 channelHandle(St, {leave, Channel, Nickname, Pid}) ->
     case lists:member(Pid, St#channel_st.userList) of
@@ -82,7 +82,3 @@ channelHandle(St, {message_send, Channel, Nickname, Pid, Msg}) ->
     % [User ! Data || User <- UsersInChannel]
     lists:foreach((fun(User) -> User ! Data end), UsersInChannel),
     {reply, ok, St}.
-
-% Catch-all for any unhandled requests
-handle(St, Data) ->
-    {reply, {error, not_implemented, "Server does not handle this command"}, St} .
