@@ -81,7 +81,7 @@ channelHandle(St, {message_send, Channel, Nickname, Pid, Msg}) ->
     % Send the message to each user in the channel (except for the sender)
     % [User ! Data || User <- UsersInChannel]
     lists:foreach((fun(User) -> User ! Data end), UsersInChannel),
-    {reply, ok, St};
+    {reply, ok, St}.
 
 % Catch-all for any unhandled requests
 handle(St, Data) ->
