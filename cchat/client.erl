@@ -52,7 +52,7 @@ handle(St, {leave, Channel}) ->
 
 % Sending message (from GUI, to channel)
 handle(St, {message_send, Channel, Msg}) ->
-    ChannelReply = request(list_to_atom(Channel), {message_send, Channel, Msg, St#client_st.nick, self()}),
+    ChannelReply = request(list_to_atom(Channel), {message_send, Channel, St#client_st.nick, self(), Msg}),
     {reply, ChannelReply, St};
 
 % This case is only relevant for the distinction assignment!
