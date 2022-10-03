@@ -36,7 +36,7 @@ stop(ServerAtom) ->
 
 % Start a new channel process
 startChannel(Channel) ->
-    genserver:start(Channel, initial_channel(), fun channelHandle/2)
+    genserver:start(Channel, initial_channel(), fun channelHandle/2).
 
 handle(St, {join, Channel, Nickname, Pid}) ->
     case lists:member(Channel, St#server_st.channelList) of
@@ -59,7 +59,7 @@ channelHandle(St, {join, Pid}) ->
             {reply, {error, user_already_joined, "User is already in the channel"}, St};
         % If user is not in channel, add his Pid to the list of users 
         false ->
-            NewUserList = lists:append([Pid], St#channel_st.userList)
+            NewUserList = lists:append([Pid], St#channel_st.userList),
             {reply, ok, St#channel_st{userList = NewUserList}}
         end.
 
