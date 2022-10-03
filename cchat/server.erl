@@ -61,7 +61,7 @@ channelHandle(St, {join, Pid}) ->
         false ->
             NewUserList = lists:append([Pid], St#channel_st.userList),
             {reply, ok, St#channel_st{userList = NewUserList}}
-        end.
+        end;
 
 channelHandle(St, {leave, Channel, Nickname, Pid}) ->
     case lists:member(Pid, St#channel_st.userList) of
@@ -72,9 +72,9 @@ channelHandle(St, {leave, Channel, Nickname, Pid}) ->
         % If user is not in channel, send appropriate error message
         false -> 
             {reply, {error, user_not_joined, "User is not in channel"}, St}
-    end.
+    end;
 
-handle(St, {message_send, Channel, Nickname, Pid, Msg}) ->
+channelHandle(St, {message_send, Channel, Nickname, Pid, Msg}) ->
     Data = {request, self(), make_ref(), {message_receive, Channel, Nickname, Msg}},
     % Get the list of users in the channel except for the sender
     UsersInChannel = lists:delete(Pid, St#channel_st.userList),
