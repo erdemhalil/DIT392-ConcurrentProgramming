@@ -36,7 +36,7 @@ stop(ServerAtom) ->
 
 % Start a new channel process
 startChannel(Channel) ->
-    genserver:start(Channel, initial_channel(), fun channelHandle/2).
+    genserver:start(list_to_atom(Channel), initial_channel(), fun channelHandle/2).
 
 handle(St, {join, Channel, Nickname, Pid}) ->
     case lists:member(Channel, St#server_st.channelList) of
@@ -75,10 +75,16 @@ channelHandle(St, {leave, Channel, Nickname, Pid}) ->
     end;
 
 channelHandle(St, {message_send, Channel, Nickname, Pid, Msg}) ->
-    Data = {request, self(), make_ref(), {message_receive, Channel, Nickname, Msg}},
-    % Get the list of users in the channel except for the sender
-    UsersInChannel = lists:delete(Pid, St#channel_st.userList),
-    % Send the message to each user in the channel (except for the sender)
-    % [User ! Data || User <- UsersInChannel]
-    lists:foreach((fun(User) -> User ! Data end), UsersInChannel),
-    {reply, ok, St}.
+
+    case lists:member(Pid, St#channel_st.userList) of
+        true ->
+            Data = {request, self(), make_ref(), {message_receive, Channel, Nickname, Msg}},
+            % Get the list of users in the channel except for the sender
+            UsersInChannel = lists:delete(Pid, St#channel_st.userList),
+            % Send the message to each user in the channel (except for the sender)
+            % [User ! Data || User <- UsersInChannel]
+            lists:foreach((fun(User) -> User ! Data end), UsersInChannel),
+            {reply, ok, St};
+        false ->
+            {reply, {error, user_not_joined, "User is not in channel"}, St}
+    end.
