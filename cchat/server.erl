@@ -32,11 +32,18 @@ start(ServerAtom) ->
 % Stop the server process registered to the given name,
 % together with any other associated processes
 stop(ServerAtom) ->
+    % Before trying to stop the server, send a request for stopping the channels associated with the server
+    genserver:request(ServerAtom, stopChannels),
     genserver:stop(ServerAtom).
 
 % Start a new channel process
 startChannel(Channel) ->
     genserver:start(list_to_atom(Channel), initial_channel(), fun channelHandle/2).
+
+handle(St, stopChannels) ->
+    % Stop every channel you get from the channel list and reply with ok
+    [genserver:stop(Channels) || Channels <- St#server_st.channelList],
+    {reply, ok, St};
 
 handle(St, {join, Channel, Nickname, Pid}) ->
     case lists:member(Channel, St#server_st.channelList) of
