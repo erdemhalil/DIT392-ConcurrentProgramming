@@ -56,7 +56,7 @@ handle(St, {join, Channel, Nickname, Pid}) ->
         % If the channel exists, proceed normally
         true ->
             Response = genserver:request(list_to_atom(Channel), {join, Pid}),
-           {reply, Response, St}
+            {reply, Response, St}
     end.
 
 channelHandle(St, {join, Pid}) ->
