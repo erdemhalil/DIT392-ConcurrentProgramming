@@ -31,7 +31,7 @@ request(Atom, Request) ->
     try genserver:request(Atom, Request) of
         Response -> Response
     catch 
-        error:_ -> {error, server_not_reached, "Server not reached"}
+        _:_ -> {error, server_not_reached, "Server not reached"}
     end.
 
 
