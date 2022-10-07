@@ -42,7 +42,7 @@ startChannel(Channel) ->
 
 handle(St, stopChannels) ->
     % Stop every channel you get from the channel list and reply with ok
-    [genserver:stop(Channels) || Channels <- St#server_st.channelList],
+    [genserver:stop(list_to_atom(Channels)) || Channels <- St#server_st.channelList],
     {reply, ok, St};
 
 handle(St, {join, Channel, Nickname, Pid}) ->
@@ -82,7 +82,6 @@ channelHandle(St, {leave, Channel, Nickname, Pid}) ->
     end;
 
 channelHandle(St, {message_send, Channel, Nickname, Pid, Msg}) ->
-
     case lists:member(Pid, St#channel_st.userList) of
         true ->
             Data = {request, self(), make_ref(), {message_receive, Channel, Nickname, Msg}},
