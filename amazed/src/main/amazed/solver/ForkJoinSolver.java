@@ -4,13 +4,8 @@ import amazed.maze.Maze;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.LinkedList;
-import java.util.HashSet;
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -25,10 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ForkJoinSolver
     extends SequentialSolver
-
 {
     private static AtomicBoolean found = new AtomicBoolean(false);
-    private List<ForkJoinSolver> threadTracker;
+    private ArrayList<ForkJoinSolver> threadTracker = new ArrayList<>();
 
     /**
      * Creates a solver that searches in <code>maze</code> from the
@@ -40,11 +34,8 @@ public class ForkJoinSolver
     {
         super(maze);
         visited = new ConcurrentSkipListSet<Integer>();
-        predecessor = new HashMap<>();
-        threadTracker = Collections.synchronizedList(new ArrayList<ForkJoinSolver>());
     }
 
-    protected Map<Integer, Integer> predecessor;
     /**
      * Creates a solver that searches in <code>maze</code> from the
      * start node to a goal, forking after a given number of visited
@@ -62,11 +53,10 @@ public class ForkJoinSolver
         this.forkAfter = forkAfter;
     }
 
-    public ForkJoinSolver(Maze maze, int start, Set<Integer> visited, Map<Integer, Integer> predecessor)
+    public ForkJoinSolver(Maze maze, int start, Set<Integer> visited)
     {
         this(maze);
         this.start = start;
-        this.predecessor = predecessor;
         this.visited = visited;
     }
 
@@ -92,16 +82,19 @@ public class ForkJoinSolver
         int current = start;
         int player = maze.newPlayer(current);
         List<Integer> toReturn = null;
+        
         while(!found.get()) {
+        
             if (maze.hasGoal(current)) {
                 found.set(true);
-                System.out.println("GOAL");
                 toReturn = pathFromTo(start, current);                             
                 break; 
             }
+            
             int nextMain = 0;
             boolean nextMainFlag = false;
             visited.add(current);
+            
             for (int nb: maze.neighbors(current)) {
                 if (!visited.contains(nb)) {
                     visited.add(nb);
@@ -110,7 +103,7 @@ public class ForkJoinSolver
                         nextMain = nb;
                         nextMainFlag = true;
                     } else {
-                    ForkJoinSolver newThread = new ForkJoinSolver(maze, nb, visited, predecessor);          
+                    ForkJoinSolver newThread = new ForkJoinSolver(maze, nb, visited);          
                     threadTracker.add(newThread);          
                     newThread.fork();
                     }
@@ -124,20 +117,17 @@ public class ForkJoinSolver
             }
 
         }   
+        
         for(ForkJoinSolver f: threadTracker) {
             List<Integer> result = f.join();
-            System.out.println(result);
-
             if(result != null)
             {
-                toReturn = pathFromTo(start, result.get(0));
-                toReturn.remove(toReturn.size() - 1);
+                int first = result.remove(0);
+                toReturn = pathFromTo(start, first);
                 toReturn.addAll(result);
             }
         }
 
         return toReturn;
-        } 
+    } 
 }
-
-
