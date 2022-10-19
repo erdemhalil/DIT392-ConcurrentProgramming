@@ -81,16 +81,22 @@ public class ForkJoinSolver
     {
         int current = start;
         int player = maze.newPlayer(current);
-        List<Integer> toReturn = null;
+        List<Integer> pathResult = null;
         
+        // found is an atomic boolean that is looped over until the player reaches the goal node.
         while(!found.get()) {
         
+            // When the goal is reached, the boolean is set to true and the traversed path is saved.
             if (maze.hasGoal(current)) {
                 found.set(true);
-                toReturn = pathFromTo(start, current);                             
+                pathResult = pathFromTo(start, current);                             
                 break; 
             }
             
+            /*  
+                To avoid spawning more threads than needed, we use the current thread to traverse the first neighbor and only fork new threads
+                on any other unvisited neighbors.
+            */
             int nextMain = 0;
             boolean nextMainFlag = false;
             visited.add(current);
@@ -103,6 +109,7 @@ public class ForkJoinSolver
                         nextMain = nb;
                         nextMainFlag = true;
                     } else {
+                    // If more than one neighbor is unvisited we fork a new thread for each unvisited neighbor and add these to threadTracker.
                     ForkJoinSolver newThread = new ForkJoinSolver(maze, nb, visited);          
                     threadTracker.add(newThread);          
                     newThread.fork();
@@ -118,16 +125,20 @@ public class ForkJoinSolver
 
         }   
         
-        for(ForkJoinSolver f: threadTracker) {
-            List<Integer> result = f.join();
+        /*
+        Loops over all threads saved to threadTracker, and joins the results from each thread. The result of Each thread is
+        used to reconstruct the complete path to the goal.
+        */
+        for(ForkJoinSolver th: threadTracker) {
+            List<Integer> result = th.join();
             if(result != null)
             {
                 int first = result.remove(0);
-                toReturn = pathFromTo(start, first);
-                toReturn.addAll(result);
+                pathResult = pathFromTo(start, first);
+                pathResult.addAll(result);
             }
         }
 
-        return toReturn;
+        return pathResult;
     } 
 }
