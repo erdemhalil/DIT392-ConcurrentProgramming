@@ -1,5 +1,5 @@
 ## 1. Description ###
----
+
 The program controls the flow of two trains running concurrently on the same track. Each train's logic rusn on its own thread making the two trains independent of each other.
 To prevent collision and derailment (running out of track or switches being used wrongly), we placed sensors in the identified critical sections.
 
@@ -11,7 +11,7 @@ Stations have 2 tracks (top and bottom). When a train is reaching a station, it 
 The middle of the map features two parallel sections. When two trains approach the section one after another going in the same direction, the first train to get to the corresponding sensor acquires the semaphore and takes the shorter path while the train behind is forced to take the other available track.
 
 ## 2. Placement of the sensors ##
----
+
 Sensor were placed on the entrances/exits of intersections to handle possible collisions and stations to allow trains to stop and change direction [(see image)](image.pdf). 
 
 The exact coordinate was done with little experimenting, making sure that there is just enough space for the braking distance so the train does not derail or enter part of the intersection it's not supposed to.
@@ -24,7 +24,7 @@ All in all, our solution uses 18 sensors.
 Additional 2 sensors to enable smooth trainflow in the middle track (in purple). (16, 17)  
 
 ## 3. Choice of critical sections ###
----
+
 We identified 3 types of critical sections on the map [(see image)](image.pdf):
 1. Stations
 2. Intersections
@@ -40,12 +40,12 @@ Last but not least, as per the requirements, we identified the parallel track in
 
 
 ## 4. Maximum train speed and the reason for it ##
----
+
 We have noticed that at speeds over 15, the trains either derailed at the stations, or collided in the intersections because the sensor reaction and braking distance were longer than anticipated.
 We had to choose between changing the location of every single sensor which might have had another side effects or stick with max speed of 15. Due to simplicity and time constraints, we went with the latter solution.
 
 ## 5. How you tested your solution ##
----
+
 Our solution was manually tested. After having figured out the maximum speed, we began testing with most values in combination [0|15]. Most of the test cases were roughly formulated as such:
 1. Train 1 has the same speed as Train 2 -> e.g. [8, 8] [15, 15] [4, 4]
 2. Train 1 is slightly faster than Train 2 and otherwise -> e.g. [15, 10] [6, 9] [3, 1]
