@@ -102,8 +102,7 @@ public class ForkJoinSolver
             visited.add(current);
             
             for (int nb: maze.neighbors(current)) {
-                if (!visited.contains(nb)) {
-                    visited.add(nb);
+                if (visited.add(nb)) {
                     predecessor.put(nb, current);
                     if (!nextMainFlag) {
                         nextMain = nb;
